@@ -43,56 +43,22 @@ func init() {
 }
 
 // Retry the given function n times jittering between max and min time.Duration
-func Retry(attempts int64, min, max time.Duration, f func() error) (err error) {
-	return retry(false, attempts, max, min, f)
-}
-
-// RetryDec like Retry but increase the jitter based on the last jitter value
-func RetryDec(attempts int64, min, max time.Duration, f func() error) (err error) {
-	return retry(true, attempts, max, min, f)
-}
-
-func retry(dec bool, attempts int64, min, max time.Duration, f func() error) (err error) {
-
-	var j int64
+func Retry(attempts int64, base, max time.Duration, f func() error) (err error) {
 	mx := int64(max)
-	mn := int64(min)
+	mn := int64(base)
 
-	for {
+	for attempt := int64(1); attempt <= attempts; attempt++ {
 
-		// Quit on a successful attempt
 		if err = f(); err == nil {
 			break
 		}
 
-		// Decrease attempt count and quit if this was the last one
-		if attempts--; attempts == 0 {
-			break
-		}
-
-		j = jitter(dec, j, mx, mn, attempts)
+		j := rand.Int63n(min(mx, mn*pow(2, attempts))-mn) + mn
 		time.Sleep(time.Duration(j))
 
 	}
 
 	return err
-}
-
-func jitter(dec bool, current int64, mx, mn, count int64) (j int64) {
-	if dec {
-		if current == 0 {
-			current = mn
-		}
-		j = min(mx, rand.Int63n(3*current-mn)+mn)
-	} else {
-		j = rand.Int63n(min(mx, mn*pow(2, count)))
-	}
-
-	if j < mn {
-		return mn
-	}
-	return j
-
 }
 
 // pow for int64
