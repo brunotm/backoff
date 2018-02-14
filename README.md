@@ -1,5 +1,5 @@
 # backoff
-### backoff provides two simple backoff and jitter implementations for retrying operations
+### backoff provides a simple backoff and jitter implementation for retrying operations
 ### As described in:
  - https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
 
